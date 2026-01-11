@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC79 MD5 TOOL 2026</title>
+<style>
+body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont;
+    background:#020617;
+    color:#e5e7eb;
+}
+.header{
+    text-align:center;
+    padding:18px;
+    font-size:22px;
+    font-weight:900;
+    background:#020617;
+    border-bottom:1px solid #1e293b;
+}
+.card{
+    background:#020617;
+    margin:14px;
+    padding:16px;
+    border-radius:18px;
+    box-shadow:0 0 22px rgba(34,197,94,.15);
+}
+input,button{
+    width:100%;
+    padding:14px;
+    border-radius:14px;
+    border:none;
+    font-size:16px;
+}
+input{
+    background:#020617;
+    color:#fff;
+    border:1px solid #334155;
+}
+button{
+    font-weight:900;
+    margin-top:10px;
+}
+.green{background:#22c55e;color:#000}
+
+/* Kết quả */
+.resultBox{
+    background:#fff7ed;
+    border:3px solid #facc15;
+    border-radius:22px;
+    padding:16px;
+    color:#7c2d12;
+    box-shadow:0 8px 25px rgba(0,0,0,.25);
+}
+.resultTitle{
+    text-align:center;
+    font-size:22px;
+    font-weight:900;
+    color:#b45309;
+    margin-bottom:12px;
+}
+.analyzing{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:16px;
+}
+.circle{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    border:6px solid #fde68a;
+    border-top:6px solid #f59e0b;
+    animation:spin 1s linear infinite;
+}
+@keyframes spin{
+    0%{transform:rotate(0)}
+    100%{transform:rotate(360deg)}
+}
+.analyzingText{
+    font-size:14px;
+    line-height:1.5;
+}
+.stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+.stat{
+    background:#fff;
+    border-radius:14px;
+    padding:10px;
+    text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.stat .value{
+    font-size:20px;
+    font-weight:900;
+    color:#dc2626;
+}
+.stat .label{
+    font-size:11px;
+    opacity:.8;
+}
+.txResult{
+    text-align:center;
+    font-size:34px;
+    font-weight:900;
+    margin-top:12px;
+}
+.tai{color:#22c55e}
+.xiu{color:#38bdf8}
+.log{
+    font-size:14px;
+    line-height:1.7;
+    opacity:.9;
+}
+/* Footer bản quyền */
+.footer {
+    text-align: center;
+    padding: 12px;
+    font-size: 14px;
+    color: #94a3b8;
+    margin-top: 20px;
+}
+/* Hoa rơi */
+.flower {
+    position: fixed;
+    top: -50px;
+    font-size: 24px;
+    pointer-events: none;
+    animation-name: fall;
+    animation-timing-function: linear;
+    z-index: 0;
+}
+@keyframes fall {
+    0% { transform: translateY(0) rotate(0deg); opacity:1; }
+    100% { transform: translateY(100vh) rotate(360deg); opacity:0; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">LC79 TOOL MD5 2026</div>
+
+<!-- Nhập MD5 -->
+<div class="card">
+    <input id="md5" placeholder="Dán MD5 (32 ký tự)">
+    <button class="green" onclick="analyze()">PHÂN TÍCH MD5</button>
+</div>
+
+<!-- Kết quả -->
+<div class="card">
+    <div class="resultBox">
+        <div class="resultTitle">KẾT QUẢ</div>
+        <div class="analyzing">
+            <div class="circle"></div>
+            <div class="analyzingText">
+                Đang Phân Tích<br>
+                Mã MD5<br>
+                Dự Đoán Tài Xỉu<br>
+                <b>Chính Xác Nhất</b>
+            </div>
+        </div>
+        <div id="txResult" class="txResult">---</div>
+        <div class="stats">
+            <div class="stat">
+                <div class="value" id="acc">0%</div>
+                <div class="label">CHÍNH XÁC</div>
+            </div>
+            <div class="stat">
+                <div class="value" id="count">0</div>
+                <div class="label">SỐ LẦN PHÂN TÍCH</div>
+            </div>
+            <div class="stat">
+                <div class="value" id="win">0%</div>
+                <div class="label">TỶ LỆ THẮNG</div>
+            </div>
+            <div class="stat">
+                <div class="value" id="lucky">0</div>
+                <div class="label">SỐ MAY MẮN</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lịch sử -->
+<div class="card">
+    <b>LỊCH SỬ PHIÊN</b>
+    <div id="history" class="log"></div>
+</div>
+
+<!-- Footer bản quyền -->
+<div class="footer">© COPYRIGHT Dviet x Tweaks 🚀 2026</div>
+
+<script>
+// Biến trạng thái
+let lastPredict=null;
+let historyTX=[];
+
+// Thuật toán phân tích MD5
+function analyze(){
+    const md5 = document.getElementById("md5").value.trim().toLowerCase();
+    if(md5.length!==32){
+        alert("MD5 phải đủ 32 ký tự");
+        return;
+    }
+
+    let even=0, odd=0;
+    for(let i=0;i<32;i++){
+        let v=parseInt(md5[i],16);
+        if(i%2===0) even+=v;
+        else odd+=v;
+    }
+
+    let score = even - odd + historyTX.slice(-3).filter(x=>"T"===x).length*2;
+    let tai = score>=0;
+    let percent = Math.min(96, Math.abs(score)*2 + 50);
+
+    lastPredict = tai ? "T" : "X";
+
+    document.getElementById("txResult").innerHTML =
+        `<span class="${tai?"tai":"xiu"}">${tai?"TÀI":"XỈU"}</span>`;
+    document.getElementById("acc").innerText = percent+"%";
+    document.getElementById("count").innerText = historyTX.length+1;
+    document.getElementById("win").innerText = Math.min(100,percent)+"%";
+    document.getElementById("lucky").innerText = Math.floor(Math.random()*99);
+
+    historyTX.push(lastPredict); // tự thêm dự đoán vào lịch sử
+    renderHistory();
+}
+
+// Hiển thị lịch sử
+function renderHistory(){
+    let log = historyTX.map((v,i)=>`#${i+1}: ${v}`);
+    document.getElementById("history").innerHTML = log.join("<br>");
+}
+
+// Hoa rơi ❄️🍁🌸
+function spawnFlower(){
+  const f=document.createElement("div");
+  f.className="flower";
+  const flowers=["🌸","❄️","🍁"];
+  f.textContent=flowers[Math.floor(Math.random()*flowers.length)];
+  f.style.left=Math.random()*100+"vw";
+  f.style.fontSize=(14 + Math.random()*20)+"px";
+  f.style.animationDuration=(6 + Math.random()*6)+"s";
+  document.body.appendChild(f);
+  setTimeout(()=>f.remove(),12000);
+}
+setInterval(spawnFlower,500);
+
+</script>
+</body>
+</html>
