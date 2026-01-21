@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LC79 TOOL MD5</title>
+    <style>
+        /* Nền */
+        body {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+            background: #000; /* Nền đen */
+            color: #00FF00; /* Chữ xanh lá */
+            background-image: linear-gradient(135deg, rgba(0, 255, 0, 0.1) 0%, rgba(0, 255, 0, 0.2) 50%, rgba(0, 255, 0, 0.3) 100%);
+            background-size: 100% 100%;
+            background-attachment: fixed;
+        }
+
+        /* Container */
+        .container {
+            max-width: 420px;
+            margin: auto;
+            padding: 15px;
+        }
+
+        /* Card */
+        .card {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.75);
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #00FF00;
+            text-shadow: 0 0 10px #00FF00, 0 0 20px #00FF00;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #00FF00;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00FF00;
+            font-size: 16px;
+            box-sizing: border-box;
+            text-shadow: 0 0 5px #00FF00;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+            background: #00FF00;
+            color: #000;
+            text-shadow: 0 0 10px #00FF00, 0 0 20px #00FF00;
+        }
+
+        .btn:hover {
+            background: #009900;
+            color: #FFF;
+            cursor: pointer;
+        }
+
+        /* Kết quả */
+        .result {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .big {
+            font-size: 26px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00FF00, 0 0 20px #00FF00;
+        }
+
+        .percent {
+            font-size: 20px;
+            color: #00FF00;
+        }
+
+        /* Hiệu ứng vòng tròn xoay */
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #00FF00;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .history {
+            font-size: 14px;
+            max-height: 120px;
+            overflow: auto;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 8px;
+            margin: 2px;
+            font-size: 13px;
+            background: rgba(0, 255, 0, 0.2);
+            color: #00FF00;
+            box-shadow: 0 0 10px #00FF00;
+        }
+
+        .tai {
+            background: rgba(0, 255, 0, 0.5);
+        }
+
+        .xiu {
+            background: rgba(255, 0, 0, 0.5);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #00FF00;
+        }
+
+        .footer a {
+            color: #00FF00;
+            text-decoration: none;
+        }
+
+        .footer img {
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="card">
+        <h2>🔮 PHÂN TÍCH MD5</h2>
+        
+        <input id="apiKey" placeholder="NHẬP KEY ĐỂ DÙNG TOOL" type="text">
+        <button class="btn" id="keyBtn">XÁC NHẬN KEY</button>
+
+        <div id="toolSection" style="display:none;">
+            <input id="md5" placeholder="NHẬP MÃ MD5(32 KÍ TỰ)">
+            <button class="btn" id="analyzeBtn">PHÂN TÍCH</button>
+            <p id="statusMessage">NHẬP CHUỖI MD5 ĐỂ PHÂN TÍCH</p>
+        </div>
+    </div>
+
+    <div class="card result">
+        <h2>KẾT QUẢ</h2>
+        <div id="loading" style="display:none;">
+            <div class="loading-spinner"></div>
+            <p>AI ĐANG PHÂN TÍCH...</p>
+        </div>
+        <div id="out" style="display:none">
+            <div class="big" id="predict"></div>
+            <div class="percent" id="prob"></div>
+            <div>🎲 TỔNG ĐIỂM: <b id="score">7,8,9,10</b></div>
+            <div>📊 Tỷ lệ: <b id="rate">63%</b></div>
+            <div>👉 GỢI Ý: <b id="suggestion">ĐÁNH XỈU</b></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>LỊCH SỬ PHIÊN</h2>
+        <div class="history" id="history"></div>
+    </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <p>© COPYRIGHT BY DVIET 2026 💎</p>
+    <p>
+        <a href="https://zalo.me/0347985662" target="_blank">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Zalo_logo.svg" width="30" height="30" alt="" /> Liên hệ Zalo
+        </a>
+        |
+        <a href="https://t.me/cskhtooltxiu" target="_blank">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Telegram_2019_logo.svg" width="30" height="30" alt="" /> Liên hệ Telegram
+        </a>
+    </p>
+</div>
+
+<script>
+    const validKeys = [
+        "DANGVIET_24H_1A2B3C", "DANGVIET_24H_4D5E6F", "DANGVIET_24H_7G8H9I", 
+        "DANGVIET_24H_J1K2L3", "DANGVIET_24H_M4N5O6", "DANGVIET_24H_P7Q8R9", 
+        "DANGVIET_24H_S1T2U3", "DANGVIET_24H_V4W5X6", "DANGVIET_24H_Y7Z8A9", 
+        "DANGVIET_24H_B1C2D3", "DANGVIET_24H_E4F5G6", "DANGVIET_24H_H7I8J9", 
+        "DANGVIET_24H_K1L2M3", "DANGVIET_24H_N4O5P6", "DANGVIET_24H_Q7R8S9", 
+        "DANGVIET_24H_T1U2V3", "DANGVIET_24H_W4X5Y6", "DANGVIET_24H_Z7A8B9", 
+        "DANGVIET_24H_C1D2E3", "DANGVIET_24H_F4G5H6", "DANGVIET_24H_I7J8K9", 
+        "DANGVIET_24H_L1M2N3", "DANGVIET_24H_O4P5Q6", "DANGVIET_24H_R7S8T9", 
+        "DANGVIET_24H_U1V2W3", "DANGVIET_24H_X4Y5Z6", "DANGVIET_24H_A7B8C9", 
+        "DANGVIET_24H_D1E2F3", "DANGVIET_24H_G4H5I6", "DANGVIET_24H_J7K8L9", 
+        "DANGVIET_24H_M1N2O3", "DANGVIET_24H_P4Q5R6", "DANGVIET_24H_S7T8U9", 
+        "DANGVIET_24H_V1W2X3", "DANGVIET_24H_Y4Z5A6", 
+        "DANGVIET_24H_B7C8D9", "DANGVIET_24H_E1F2G3", "DANGVIET_24H_H4I5J6", 
+        "DANGVIET_24H_K7L8M9", "DANGVIET_24H_N1O2P3", "DANGVIET_24H_Q4R5S6", 
+        "DANGVIET_24H_T7U8V9", "DANGVIET_24H_W1X2Y3", "DANGVIET_24H_Z4A5B6", 
+        "DANGVIET_24H_C7D8E9", "DANGVIET_24H_F1G2H3", "DANGVIET_24H_I4J5K6", 
+        "DANGVIET_24H_L7M8N9", "DANGVIET_24H_O1P2Q3", "DANGVIET_24H_R4S5T6"
+    ];
+
+    // Gán sự kiện khi nhấn nút xác nhận key
+    document.getElementById("keyBtn").addEventListener("click", validateKey);
+
+    // Gán sự kiện khi nhấn nút phân tích
+    document.getElementById("analyzeBtn").addEventListener("click", analyze);
+
+    let historyData = [];
+
+    // Kiểm tra mã khóa hợp lệ
+    function validateKey() {
+        const enteredKey = document.getElementById("apiKey").value.trim();
+        if (validKeys.includes(enteredKey)) {
+            document.getElementById("toolSection").style.display = "block";
+            document.getElementById("apiKey").style.display = "none";
+            document.getElementById("keyBtn").style.display = "none";
+            alert("KEY HỢP LỆ.BẠN ĐÃ CÓ QUYỀN SỬ DỤNG TOOL");
+        } else {
+            alert("KEY KHÔNG HỢP LỆ.VUI LÒNG LIÊN HỆ ADM ĐỂ MUA KEY");
+        }
+    }
+
+    // Hàm kiểm tra tính hợp lệ của MD5
+    function isValidMD5(md5) {
+        return /^[a-fA-F0-9]{32}$/.test(md5);
+    }
+
+    // Phân tích MD5 và tính toán kết quả
+    function analyze() {
+        let md5 = document.getElementById("md5").value.trim();
+        if (!isValidMD5(md5)) {
+            alert("MD5 không hợp lệ! Vui lòng nhập mã MD5 hợp lệ.");
+            return;
+        }
+
+        // Hiển thị vòng tròn xoay khi đang phân tích
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("out").style.display = "none";
+        document.getElementById("statusMessage").innerText = "AI ĐANG PHÂN TÍCH...";
+
+        setTimeout(() => {
+            let score = calculateMD5Score(md5);
+            let result = score >= 11 ? "🔴 TÀI" : "🔵 XỈU";
+            let probability = score >= 11 ? 75 : 25; // Tính tỷ lệ xác suất chính xác
+            let suggestion = (score >= 11) ? "ĐÁNH TÀI" : "ĐÁNH XỈU";
+            let rate = `${probability}%`;
+
+            displayResults(result, probability, suggestion, score, rate);
+        }, 1200);
+    }
+
+    // Hàm tính toán điểm MD5
+    function calculateMD5Score(md5) {
+        let sum = 0;
+        for (let i = 0; i < md5.length; i++) {
+            sum += parseInt(md5[i], 16); // Sử dụng các giá trị hex của chuỗi MD5
+        }
+        return sum % 18 + 3; // Điểm từ 3 đến 18
+    }
+
+    // Hiển thị kết quả phân tích
+    function displayResults(result, probability, suggestion, totalPoints, rate) {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("out").style.display = "block";
+        document.getElementById("predict").innerText = result;
+        document.getElementById("prob").innerText = "Xác suất: " + probability + "%";
+        document.getElementById("suggestion").innerText = suggestion;
+        document.getElementById("score").innerText = totalPoints;
+        document.getElementById("rate").innerText = rate;
+
+        // Lưu kết quả vào lịch sử
+        historyData.push({
+            md5: document.getElementById("md5").value,
+            result: result,
+            probability: probability,
+            suggestion: suggestion,
+            totalPoints: totalPoints,
+            rate: rate
+        });
+
+        renderHistory();
+    }
+
+    // Hiển thị lịch sử phân tích
+    function renderHistory() {
+        let historyContainer = document.getElementById("history");
+        historyContainer.innerHTML = ""; // Xóa lịch sử hiện tại
+
+        // Hiển thị tối đa 5 mục
+        let maxHistory = 5;
+        let start = Math.max(0, historyData.length - maxHistory);
+
+        for (let i = start; i < historyData.length; i++) {
+            let entry = historyData[i];
+            let entryDiv = document.createElement("div");
+            entryDiv.innerHTML = `<span class="badge ${entry.result === "🔴 TÀI" ? "tai" : "xiu"}">${entry.result}</span> MD5: ${entry.md5} - Xác suất: ${entry.probability}% - Đề xuất: ${entry.suggestion}`;
+            historyContainer.appendChild(entryDiv);
+        }
+    }
+</script>
+
+</body>
+</html>
